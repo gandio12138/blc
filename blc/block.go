@@ -3,6 +3,7 @@ package BLC
 import (
 	"bytes"
 	"crypto/sha256"
+	"encoding/gob"
 	"strconv"
 	"time"
 )
@@ -35,6 +36,18 @@ func NewGenesisBlock() *Block {
 	return NewBlock("Genesis Block", []byte{})
 }
 
+func DeserializeBlock(data []byte) *Block {
+	var (
+		block   Block
+		decoder = gob.NewDecoder(bytes.NewReader(data))
+		err     = decoder.Decode(&block)
+	)
+	if err != nil {
+		panic(err)
+	}
+	return &block
+}
+
 // SetHash 设置当前块hash
 func (blc *Block) SetHash() {
 	timestamp := []byte(strconv.FormatInt(blc.TimeStamp, 10))
@@ -47,4 +60,16 @@ func (blc *Block) SetHash() {
 	)
 	hash := sha256.Sum256(headers)
 	blc.Hash = hash[:]
+}
+
+func (blc *Block) Serialize() []byte {
+	var (
+		result  bytes.Buffer
+		encoder = gob.NewEncoder(&result)
+	)
+	err := encoder.Encode(blc)
+	if err != nil {
+		panic(err)
+	}
+	return result.Bytes()
 }
