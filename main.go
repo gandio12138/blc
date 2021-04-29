@@ -1,17 +1,19 @@
 package main
 
 import (
-	"blc/blc"
+	"blc/BLC"
 	"fmt"
 )
 
 func main() {
-	blockChain := blc.CreateBlockChainWithGenesisBlock()
-	prevBlock1 := blockChain.Blocks[len(blockChain.Blocks)-1]
-	blockChain.AddBlockToBlockChain("first block", prevBlock1.Height, prevBlock1.Hash)
-	prevBlock2 := blockChain.Blocks[len(blockChain.Blocks)-1]
-	blockChain.AddBlockToBlockChain("first block", prevBlock2.Height, prevBlock2.Hash)
-	prevBlock3 := blockChain.Blocks[len(blockChain.Blocks)-1]
-	blockChain.AddBlockToBlockChain("first block", prevBlock3.Height, prevBlock3.Hash)
-	fmt.Println(blockChain)
+	bc := BLC.NewBlockChain()
+	bc.AddBlock("Send 1 BTC to Ivan")
+	bc.AddBlock("Send 2 BTC to Ivan")
+
+	for _, block := range bc.Blocks {
+		fmt.Printf("Prev hash: %x\n", block.PrevBlockHash)
+		fmt.Printf("Data: %s\n", block.Data)
+		fmt.Printf("Hash: %x\n", block.Hash)
+		fmt.Println()
+	}
 }

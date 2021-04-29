@@ -1,15 +1,15 @@
-package blc
+package BLC
 
 type BlockChain struct {
 	Blocks []*Block
 }
 
-// CreateBlockChainWithGenesisBlock 创建一个区块链
-func CreateBlockChainWithGenesisBlock() *BlockChain {
-	return &BlockChain{Blocks: []*Block{CreateGenesisBlock("Genesis Block ......")}}
+// NewBlockChain 创建一个有创世块的区块链
+func NewBlockChain() *BlockChain {
+	return &BlockChain{Blocks: []*Block{NewGenesisBlock()}}
 }
 
-// AddBlockToBlockChain 添加区块到区块链
-func (blc *BlockChain) AddBlockToBlockChain(data string, height int64, prevHash []byte) {
-	blc.Blocks = append(blc.Blocks, NewBlock(data, height, prevHash))
+// AddBlock 向链中添加块
+func (bc *BlockChain) AddBlock(data string) {
+	bc.Blocks = append(bc.Blocks, NewBlock(data, bc.Blocks[len(bc.Blocks)-1].Hash))
 }

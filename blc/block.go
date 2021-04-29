@@ -1,55 +1,50 @@
-package blc
+package BLC
 
 import (
 	"bytes"
 	"crypto/sha256"
-	"fmt"
 	"strconv"
 	"time"
 )
 
 type Block struct {
-	Hash          []byte // 本区块hash
-	PrevBlockHash []byte // 前一个区块hash
-	Data          []byte // 交易数据
-	TimeStamp     int64  // 时间戳
-	Height        int64  // 区块链高度
-	Nonce         int64  // 工作量证明
+	TimeStamp     int64
+	Nonce         int64
+	PrevBlockHash []byte
+	Hash          []byte
+	Data          []byte
 }
 
-// SetHash 设置当前区块hash
-func (block *Block) SetHash() {
-	// 当前区块高度、时间戳转换成字节数组
-	heightBytes := IntToHex(block.Height)
-	timeStamp := []byte(strconv.FormatInt(block.TimeStamp, 2))
-	// 拼接属性
-	blockBytes := bytes.Join([][]byte{
-		heightBytes,
-		block.PrevBlockHash,
-		block.Data,
-		timeStamp,
-		block.Hash,
-	}, []byte{})
-	currHash := sha256.Sum256(blockBytes)
-	fmt.Printf("curr block hash value : %v\n", currHash)
-	block.Hash = blockBytes
-}
-
-// NewBlock 创建新区块
-func NewBlock(data string, height int64, prevBlockHash []byte) *Block {
+func NewBlock(data string, prevBlockHash []byte) *Block {
 	block := &Block{
-		PrevBlockHash: prevBlockHash,
-		Data:          []byte(data),
 		TimeStamp:     time.Now().Unix(),
-		Height:        height,
+		PrevBlockHash: prevBlockHash,
+		Hash:          []byte{},
+		Data:          []byte(data),
+		Nonce:         0,
 	}
 	pow := NewProofOfWork(block)
-	block.Hash, block.Nonce = pow.Run()
-	fmt.Printf("\r%d-%x\n", block.Nonce, block.Hash)
+	nonce, hash := pow.Run()
+	block.Hash = hash
+	block.Nonce = nonce
 	return block
 }
 
-// CreateGenesisBlock 创建创世块
-func CreateGenesisBlock(data string) *Block {
-	return NewBlock(data, 1, []byte{0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0})
+// NewGenesisBlock 生成创世块
+func NewGenesisBlock() *Block {
+	return NewBlock("Genesis Block", []byte{})
+}
+
+// SetHash 设置当前块hash
+func (blc *Block) SetHash() {
+	timestamp := []byte(strconv.FormatInt(blc.TimeStamp, 10))
+	headers := bytes.Join(
+		[][]byte{
+			blc.PrevBlockHash,
+			blc.Data,
+			timestamp,
+		}, []byte{},
+	)
+	hash := sha256.Sum256(headers)
+	blc.Hash = hash[:]
 }

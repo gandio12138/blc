@@ -1,71 +1,68 @@
-package blc
+package BLC
 
 import (
 	"bytes"
 	"crypto/sha256"
+	"fmt"
+	"math"
 	"math/big"
 )
 
-const targetBits = 16
+const (
+	targetBits = 24
+	maxNonce   = math.MaxInt64
+)
 
 type ProofOfWork struct {
-	Block  *Block   // 求工作量的block
-	target *big.Int // 工作量难度
+	block  *Block
+	target *big.Int
 }
 
-// 拼接区块属性，返回字节数组
-func (pow *ProofOfWork) prepareData(nonce int) []byte {
-	data := bytes.Join(
-		[][]byte{
-			pow.Block.PrevBlockHash,
-			pow.Block.Data,
-			IntToHex(pow.Block.TimeStamp),
-			IntToHex(int64(targetBits)),
-			IntToHex(int64(nonce)),
-			IntToHex(pow.Block.Height),
-		},
-		[]byte{})
-	return data
-}
-
-// IsValid 当前区块有效性验证
-func (pow *ProofOfWork) IsValid() bool {
-	var (
-		hashInt big.Int
-	)
-	hashInt.SetBytes(pow.Block.Hash)
-	if pow.target.Cmp(&hashInt) == 1 {
-		return true
-	}
-	return false
-}
-
-// Run 运行工作量证明 找难度随机数
-func (pow *ProofOfWork) Run() ([]byte, int64) {
-	var (
-		nonce   = 0
-		hashInt big.Int
-		hash    [32]byte
-	)
-	for {
-		// 拼接区块字段
-		// 生成当前区块hash
-		hash = sha256.Sum256(pow.prepareData(nonce))
-		hashInt.SetBytes(hash[:])
-		if pow.target.Cmp(&hashInt) == 1 {
-			break
-		}
-		nonce++
-	}
-	return hash[:], int64(nonce)
-}
-
-// NewProofOfWork 创建带有工作证明的区块
-func NewProofOfWork(block *Block) *ProofOfWork {
+func NewProofOfWork(b *Block) *ProofOfWork {
 	target := big.NewInt(1)
-	target = target.Lsh(target, 256-targetBits)
+	target.Lsh(target, 256-targetBits)
 	return &ProofOfWork{
-		Block:  block,
+		block:  b,
 		target: target,
 	}
+}
+
+func (pow *ProofOfWork) prepareData(nonce int64) []byte {
+	return bytes.Join([][]byte{
+		pow.block.PrevBlockHash,
+		pow.block.Data,
+		IntTOHex(pow.block.TimeStamp),
+		IntTOHex(int64(targetBits)),
+		IntTOHex(nonce),
+	}, []byte{})
+}
+
+func (pow *ProofOfWork) Run() (int64, []byte) {
+	var (
+		hashInt big.Int
+		hash    [32]byte
+		nonce   = int64(0)
+	)
+	fmt.Printf("Mining the block containing \"%s\"\n", pow.block.Data)
+	for nonce < maxNonce {
+		data := pow.prepareData(nonce)
+		hash = sha256.Sum256(data)
+		hashInt.SetBytes(hash[:])
+		if hashInt.Cmp(pow.target) == -1 {
+			fmt.Printf("\r%x\n", hash)
+			break
+		} else {
+			nonce++
+		}
+	}
+	return nonce, hash[:]
+}
+
+func (pow *ProofOfWork) Validate() bool {
+	var (
+		hashInt big.Int
+	)
+	hash := sha256.Sum256(pow.prepareData(pow.block.Nonce))
+	hashInt.SetBytes(hash[:])
+	return hashInt.Cmp(pow.target) == -1
 }
