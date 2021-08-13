@@ -3,7 +3,7 @@ pipeline {
   stages {
     stage('build') {
       steps {
-        sh 'git branch -a'
+        sh 'ls'
       }
     }
 
