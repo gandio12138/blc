@@ -3,7 +3,8 @@ pipeline {
   stages {
     stage('build') {
       steps {
-        sh 'go version'
+        sh '''#!/bin/bash -ilex
+go version'''
       }
     }
 
