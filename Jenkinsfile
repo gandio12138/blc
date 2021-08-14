@@ -5,7 +5,8 @@ pipeline {
       steps {
         sh '''#!/bin/bash -ilex
 go version
-ls'''
+ls
+git branch -a'''
       }
     }
 
