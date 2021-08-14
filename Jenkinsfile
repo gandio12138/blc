@@ -4,7 +4,8 @@ pipeline {
     stage('build') {
       steps {
         sh '''#!/bin/bash -ilex
-go version'''
+go version
+ls'''
       }
     }
 
