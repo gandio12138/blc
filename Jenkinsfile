@@ -2,10 +2,23 @@ pipeline {
   agent any
   stages {
     stage('build') {
-      steps {
-        sh '''source /etc/profile
+      parallel {
+        stage('build') {
+          steps {
+            sh '''source /etc/profile
 go version
 git branch -a'''
+          }
+        }
+
+        stage('b') {
+          steps {
+            sh '''source /etc/profile
+go version
+git branch -a'''
+          }
+        }
+
       }
     }
 
