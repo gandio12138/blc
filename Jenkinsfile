@@ -3,7 +3,8 @@ pipeline {
   stages {
     stage('build') {
       steps {
-        sh 'go version'
+        sh '''source /etc/profile
+go version'''
       }
     }
 
