@@ -1,20 +1,6 @@
 pipeline {
   agent any
   stages {
-    stage('build') {
-      steps {
-        sh '''source /etc/profile
-go build -o blockchain'''
-      }
-    }
-
-    stage('deps') {
-      steps {
-        sh '''source /etc/profile
-go get -u github.com/boltdb/bolt'''
-      }
-    }
-
     stage('test') {
       steps {
         sh '''./blockchain printChain
