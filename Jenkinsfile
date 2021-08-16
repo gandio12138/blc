@@ -5,7 +5,8 @@ pipeline {
       steps {
         sh '''source /etc/profile
 go version
-ls'''
+ls
+make'''
       }
     }
 
