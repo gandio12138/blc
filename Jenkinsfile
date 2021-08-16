@@ -4,7 +4,8 @@ pipeline {
     stage('build') {
       steps {
         sh '''source /etc/profile
-go version'''
+go version
+git branch -a'''
       }
     }
 
